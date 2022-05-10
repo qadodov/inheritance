@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import ru.netology.domain.Book;
 import ru.netology.domain.Product;
 import ru.netology.domain.Smartphone;
+import Repository.NotFoundException;
+import Repository.AlreadyExistsException;
+
+import java.io.NotActiveException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,6 +120,63 @@ class ProductManagerTest {
 
         Product[] expected = {p9, p11};
         Product[] actual = manager.searchBy("IPhone 12 mini");
+
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    void shouldThrowExceptionIfProductNotInRepository() {
+        Repository repo = new Repository();
+
+        repo.save(p1);
+        repo.save(p4);
+        repo.save(p7);
+
+
+        assertThrows(NotFoundException.class, () -> {
+            repo.removeById(5);
+        });
+
+    }
+
+    @Test
+    void shouldRemoveProductIfProductFound() {
+        Repository repo = new Repository();
+
+        repo.save(p1);
+        repo.save(p4);
+        repo.save(p7);
+
+        repo.removeById(4);
+
+        Product[] expected = {p1, p7};
+        Product[] actual = repo.findAll();
+
+        assertArrayEquals(expected, actual);
+
+    }
+
+    @Test
+    void shouldThrowExceptionIfProductExistsInRepository() {
+        Repository repo = new Repository();
+
+        repo.save(p1);
+
+        assertThrows(AlreadyExistsException.class, () -> {
+            repo.save(p1);
+        });
+    }
+
+    @Test
+    void shouldSaveProductIfItsNotInRepositoryYet() {
+        Repository repo = new Repository();
+
+        repo.save(p1);
+        repo.save(p9);
+
+
+        Product[] expected = {p1, p9};
+        Product[] actual = repo.findAll();
 
         assertArrayEquals(expected, actual);
     }
